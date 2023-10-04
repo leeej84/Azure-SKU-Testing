@@ -129,14 +129,32 @@ if(-not (Is-InputValid))
     return
 }
 
-Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System -Name LocalAccountTokenFilterPolicy -Value 1
+#Disable local token filtering
+Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System -Name LocalAccountTokenFilterPolicy -Value 1#
+
+# open port 5985 in the internal Windows firewall to allow WinRM communication
+netsh advfirewall firewall add rule name="WinRM 5985" protocol=TCP dir=in localport=5985 action=allow
+
+net stop winrm
+sc config winrm start=auto
+net start winrm
+
 netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=yes
-winrm quickconfig
+winrm quickconfig -q
+
+winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="2048"}'
+winrm set winrm/config/winrs '@{MaxConcurrentUsers="100"}'
+winrm set winrm/config/winrs '@{MaxProcessesPerShell="0"}'
+winrm set winrm/config/winrs '@{MaxShellsPerUser="0"}'
+winrm set winrm/config '@{MaxTimeoutms="7200000"}'
+winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+winrm set winrm/config/service/auth '@{Basic="true"}'
+winrm set winrm/config/service/auth '@{CredSSP="true"}'
+winrm set winrm/config/client '@{TrustedHosts="*"}'
 
 # The default MaxEnvelopeSizekb on Windows Server is 500 Kb which is very less. It needs to be at 8192 Kb. The small envelop size if not changed
 # results in WS-Management service responding with error that the request size exceeded the configured MaxEnvelopeSize quota.
 winrm set winrm/config '@{MaxEnvelopeSizekb = "8192"}'
-
 
 # Configure WinRM listener
 Configure-WinRMListener
