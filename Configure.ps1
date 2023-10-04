@@ -75,7 +75,7 @@ try {
     $process = Start-Process terraform.exe -ArgumentList "apply", "-auto-approve", "-var=`"ext_ip=$externalIP`"" -PassThru
     $process | Wait-Process
     #Output the results of the build process to a json file for later integrations
-    Start-Process terraform.exe -ArgumentList "output -json values.json"
+    Invoke-Expression "terraform.exe output -json > values.json"
 
     #Check for the TF outputs
     if (Test-Path "$PSScriptRoot\values.json") {

@@ -90,21 +90,6 @@ resource "azurerm_windows_virtual_machine" "main" {
   }
 }
 
-#Disable LocalAccountTokenFilterPolicy to allow winRM setup
-resource "azurerm_virtual_machine_extension" "LATFP" {
-  name                 = "LATFP"
-  virtual_machine_id   = azurerm_windows_virtual_machine.main.id
-  publisher            = "Microsoft.Compute"
-  type                 = "CustomScriptExtension"
-  type_handler_version = "1.9"
-
-  protected_settings = <<SETTINGS
-  {    
-    "commandToExecute": "powershell -Command Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System -Name LocalAccountTokenFilterPolicy -Value 1"
-  }
-  SETTINGS
-}
-
 #Configure WinRM on the VM 
 resource "azurerm_virtual_machine_extension" "configure_winrm" {
   name                 = "configure_winrm"
@@ -115,8 +100,8 @@ resource "azurerm_virtual_machine_extension" "configure_winrm" {
 
   protected_settings = <<SETTINGS
   {    
-    "fileUris": ["https://raw.githubusercontent.com/microsoft/azure-pipelines-extensions/master/TaskModules/powershell/WinRM/WinRM-Http-Https/ConfigureWinRM.ps1"],
-    "commandToExecute": "powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File ConfigureWinRM.ps1 -hostname ${var.prefix}-vm -protocol http"
+    "fileUris": ["https://raw.githubusercontent.com/leeej84/Azure-SKU-Testing/main/Configure_Winrm.ps1"],
+    "commandToExecute": "powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File Configure_Winrm.ps1 -hostname ${var.prefix}-vm -protocol http"
   }
   SETTINGS
 }

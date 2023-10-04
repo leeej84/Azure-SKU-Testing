@@ -135,10 +135,6 @@ Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\
 # open port 5985 in the internal Windows firewall to allow WinRM communication
 netsh advfirewall firewall add rule name="WinRM 5985" protocol=TCP dir=in localport=5985 action=allow
 
-net stop winrm
-sc config winrm start=auto
-net start winrm
-
 netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=yes
 winrm quickconfig -q
 
