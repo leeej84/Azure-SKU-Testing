@@ -134,10 +134,16 @@ Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\
 
 # open port 5985 in the internal Windows firewall to allow WinRM communication
 netsh advfirewall firewall add rule name="WinRM 5985" protocol=TCP dir=in localport=5985 action=allow
-
+netsh advfirewall firewall add rule name="WinRM 5986" protocol=TCP dir=in localport=5986 action=allow
+netsh advfirewall firewall set rule group="remote administration" new enable=yes
 netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=yes
 winrm quickconfig -q
 
+#Create self signed cert
+$Cert = New-SelfSignedCertificate -CertstoreLocation Cert:\LocalMachine\My -DnsName "packer"
+New-Item -Path WSMan:\LocalHost\Listener -Transport HTTPS -Address * -CertificateThumbPrint $Cert.Thumbprint -Force
+
+#Set WinRM Parameters
 winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="2048"}'
 winrm set winrm/config/winrs '@{MaxConcurrentUsers="100"}'
 winrm set winrm/config/winrs '@{MaxProcessesPerShell="0"}'
@@ -147,6 +153,9 @@ winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 winrm set winrm/config/service/auth '@{Basic="true"}'
 winrm set winrm/config/service/auth '@{CredSSP="true"}'
 winrm set winrm/config/client '@{TrustedHosts="*"}'
+winrm set "winrm/config/client" '@{AllowUnencrypted="true"}'
+
+winrm set "winrm/config/listener?Address=*+Transport=HTTPS" "@{Port=`"5986`";Hostname=`"packer`";CertificateThumbprint=`"$($Cert.Thumbprint)`"}"
 
 # The default MaxEnvelopeSizekb on Windows Server is 500 Kb which is very less. It needs to be at 8192 Kb. The small envelop size if not changed
 # results in WS-Management service responding with error that the request size exceeded the configured MaxEnvelopeSize quota.
@@ -157,6 +166,11 @@ Configure-WinRMListener
 
 # Add firewall exception
 Add-FirewallException
+
+# Set service to start automatically
+Get-Service Winrm | Stop-Service
+Get-Service Winrm | Set-Service -StartupType Automatic
+Get-Service Winrm | Start-Service
 
 # List the listeners
 Write-Verbose -Verbose "Listing the WinRM listeners:"
