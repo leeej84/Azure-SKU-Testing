@@ -14,3 +14,9 @@ variable "ext_ip" {
   default     = "154.61.57.200"
   description = "External IP to allow traffic from"
 }
+
+variable "vmSize" {
+  type        = string
+  default     = "Standard_DS1_v2"
+  description = "VM SKU size in Azure"
+}

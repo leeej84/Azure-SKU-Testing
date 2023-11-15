@@ -68,13 +68,13 @@ resource "azurerm_network_interface_security_group_association" "testing_nsg" {
 
 # Create virtual machine
 resource "azurerm_windows_virtual_machine" "main" {
-  name                  = "${var.prefix}-vm"
+  name                  = "${random_pet.prefix.id}-vm"
   admin_username        = "azureuser"
   admin_password        = random_password.password.result
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
   network_interface_ids = [azurerm_network_interface.testing_nic.id]
-  size                  = "Standard_DS1_v2"
+  size                  = "${var.vmSize}"
 
   os_disk {
     name                 = "test-OSDisk"
@@ -113,7 +113,7 @@ resource "random_pet" "prefix" {
 
 resource "random_password" "password" {
   length           = 12
-  special          = true
+  special          = false
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 

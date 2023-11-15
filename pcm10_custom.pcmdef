@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<benchmark>
+  <test_info>
+    <benchmark_tests>
+      <benchmark_test name="Pcm10ApplicationsBenchmarkCustom" test_run_type="EXPLICIT" version="1.0"/>
+    </benchmark_tests>
+  </test_info>
+  <application_info>
+    <selected_workloads>
+      <selected_workload name="Pcm10ApplicationsWordCustom"/>
+      <selected_workload name="Pcm10ApplicationsExcelCustom"/>
+      <selected_workload name="Pcm10ApplicationsEdgeCustom"/>
+    </selected_workloads>
+  </application_info>
+  <settings>
+  </settings>
+</benchmark>

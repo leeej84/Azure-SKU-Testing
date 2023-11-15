@@ -1,2 +1,5 @@
 .terraform
 *.lock.hcl
+*.zip
+pcmark_license.txt
+values.json
